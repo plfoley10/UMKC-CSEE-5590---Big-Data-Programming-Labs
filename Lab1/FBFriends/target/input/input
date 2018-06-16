@@ -1,5 +1,0 @@
-jim : chris julie carol
-chris : jim julie carol sam
-julie : jim chris carol sam
-carol : jim chris julie sam
-sam : chris julie carol
