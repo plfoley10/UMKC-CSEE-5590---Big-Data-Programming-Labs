@@ -1,5 +1,5 @@
-A:B C D
-B:A C D E
-C:A B D E
-D:A B C E
-E:B C D
+jim : chris julie carol
+chris : jim julie carol sam
+julie : jim chris carol sam
+carol : jim chris julie sam
+sam : chris julie carol
