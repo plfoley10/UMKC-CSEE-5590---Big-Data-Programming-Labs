@@ -1,0 +1,123 @@
+##############################################################
+create table temp (
+Restaurant_ID INT,
+Restaurant_Name STRING,
+Country_Code INT,
+City STRING,
+Address ARRAY<STRING>,
+Locality ARRAY<STRING>,
+Locality_Verbose ARRAY<STRING>,
+Longitude DOUBLE,
+Latitude DOUBLE,
+Cuisines ARRAY<STRING>,
+Average_Cost_of_two FLOAT,
+Currency STRING,
+Has_Table_booking STRING,
+Has_Online_delivery STRING,
+Is_delivering_now STRING,
+Switch_to_order_menu STRING,
+Price_range INT,
+Aggregate_rating FLOAT,
+Rating_color STRING,
+Rating_text STRING,
+Votes INT)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde' STORED AS TEXTFILE;
+
+load data local inpath '/home/cloudera/Downloads/zomato.csv' into table temp;
+
+create table temp2 (
+Restaurant_ID INT,
+Restaurant_Name STRING,
+Country_Code INT,
+City STRING,
+Address STRING,
+Locality STRING,
+Locality_Verbose STRING,
+Longitude DOUBLE,
+Latitude DOUBLE,
+Cuisines STRING,
+Average_Cost_of_two FLOAT,
+Currency STRING,
+Has_Table_booking STRING,
+Has_Online_delivery STRING,
+Is_delivering_now STRING,
+Switch_to_order_menu STRING,
+Price_range INT,
+Aggregate_rating FLOAT,
+Rating_color STRING,
+Rating_text STRING,
+Votes INT);
+
+INSERT OVERWRITE TABLE temp2 SELECT * FROM temp;
+
+create table restaurants (
+Restaurant_ID INT,
+Restaurant_Name STRING,
+Country_Code INT,
+City STRING,
+Address STRING,
+Locality STRING,
+Locality_Verbose STRING,
+Long_Lat ARRAY<DOUBLE>,
+Cuisines STRING,
+Average_Cost_of_two FLOAT,
+Currency STRING,
+Has_Table_booking STRING,
+Has_Online_delivery STRING,
+Is_delivering_now STRING,
+Switch_to_order_menu STRING,
+Price_range INT,
+Aggregate_rating FLOAT,
+Rating ARRAY <STRING>,
+Votes INT);
+
+INSERT INTO restaurants
+SELECT
+restaurant_id,
+restaurant_name,
+country_code,
+city,
+address,
+locality,
+locality_verbose,
+array(longitude, latitude) as long_lat,
+cuisines,
+average_cost_of_two,
+currency,
+has_table_booking,
+has_online_delivery,
+is_delivering_now,
+switch_to_order_menu,
+price_range,
+aggregate_rating,
+array(rating_color, rating_text) as rating,
+votes
+FROM temp2;
+
+######################################################################################
+
+select Restaurant_Name, Aggregate_rating from restaurants Restaurant_Name WHERE Aggregate_rating = 4.9;
+
+select Restaurant_Name, Cuisines from restaurants where Cuisines rlike '.*(French).*';
+
+select Restaurant_Name  from restaurants where City='London';
+
+select Restaurant_Name, COUNT(*) from restaurants GROUP BY Restaurant_Name HAVING COUNT(*) > 20;
+
+select Restaurant_Name, Cuisines, Price_range from restaurants where Price_range > 3;
+
+select Restaurant_Name from restaurants where City = 'London' and Cuisines rlike '.*(French).*';
+
+select Restaurant_Name, concat(Has_Table_booking, ', ', Has_Online_delivery) as online from restaurants WHERE Has_TABLE_booking = 'Yes' AND Has_Online_delivery = 'Yes';
+
+select Restaurant_Name, Cuisines from restaurants where Address rlike '.*(Century City Mall).*';
+
+select * from restaurants where votes > 9999;
+
+select Restaurant_Name, Aggregate_rating,
+(CASE
+WHEN Aggregate_rating > 3.9 THEN 'Exceptional Restaurant'
+WHEN Aggregate_rating > 2.9 THEN 'Good Restaurant'
+ELSE 'Needs Improvement'
+END)
+FROM restaurants;
